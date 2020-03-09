@@ -170,11 +170,11 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Hand Angle" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TYs-7s-E2g">
-                                <rect key="frame" x="102" y="174" width="210" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Test" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K5Q-8H-ZbU">
+                                <rect key="frame" x="191" y="180" width="33" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="light" pointSize="24"/>
-                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
@@ -203,6 +203,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="arView" destination="8bC-Xf-vdC" id="hvU-Ek-za3"/>
+                        <outlet property="handAngleLabel" destination="K5Q-8H-ZbU" id="LCu-ga-oX8"/>
                         <outlet property="recordButton" destination="5ON-81-KQU" id="mjJ-zV-Vad"/>
                         <outlet property="recordButtonView" destination="gDG-Si-i2l" id="g2j-zX-wSS"/>
                         <outlet property="timerLabel" destination="BOn-9i-YcO" id="hrw-kI-8Qg"/>
@@ -212,7 +213,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-41" y="-498"/>
+            <point key="canvasLocation" x="-42.028985507246382" y="-498.21428571428567"/>
         </scene>
         <!--About View Controller-->
         <scene sceneID="4eH-nY-wJA">

@@ -19,7 +19,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     @IBOutlet var arView: ARView!
     @IBOutlet var timerView: UIView!
     @IBOutlet var timerLabel: UILabel!
-    @IBOutlet var handAngle: UILabel!
+    @IBOutlet weak var handAngleLabel: UILabel!
     
     // write transform data to json
     var printoutText: String = ""
@@ -272,6 +272,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     }
     
     func updateTimerLabel() {
+        
         var toDisplay = ""
         milliseconds += 1
         if (milliseconds / 100) < 10 {
@@ -325,14 +326,8 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         
         recordButtonView.layer.masksToBounds = true
         recordButtonView.layer.cornerRadius = recordButtonView.layer.frame.height / 2
-        
-        
-        let handAngleLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
-        handAngleLabel.center = CGPoint(x: 160, y: 285)
-        handAngleLabel.textAlignment = .center
-        handAngleLabel.text = "I'm a test label"
-        self.view.addSubview(handAngleLabel)
     }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         arView.session.delegate = self
@@ -391,6 +386,11 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             // in the world is relative to the body anchor's rotation.
             characterAnchor.orientation = Transform(matrix: bodyAnchor.transform).rotation
             
+            // Do some math
+            var handAngle = getHandAngle(bodyAnchor: bodyAnchor)
+            // Update label
+            self.handAngleLabel.text = String(describing: handAngle)
+            
             if let character = character, character.parent == nil {
                 // Attach the character to its anchor as soon as
                 // 1. the body anchor was detected and
@@ -410,5 +410,11 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
                 }
             }
         }
+    }
+    
+    func getHandAngle(bodyAnchor : ARAnchor) -> Float {
+        
+        
+        return 3.0
     }
 }
