@@ -314,7 +314,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     
     // The 3D character to display.
     var character: BodyTrackedEntity?
-    let characterOffset: SIMD3<Float> = [-1.0, 0, 0] // Offset the character by one meter to the left
+    let characterOffset: SIMD3<Float> = [-0.3, 0, 0] // Offset the character by one meter to the left
     let characterAnchor = AnchorEntity()
     
     override func viewDidLoad() {
@@ -387,7 +387,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             characterAnchor.orientation = Transform(matrix: bodyAnchor.transform).rotation
             
             // Do some math
-            var handAngle = getHandAngle(bodyAnchor: bodyAnchor)
+            var handAngle = makeDegreeStringPretty(deg: getHandAngle(bodyAnchor: bodyAnchor))
             // Update label
             self.handAngleLabel.text = String(describing: handAngle)
             
@@ -412,9 +412,82 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         }
     }
     
-    func getHandAngle(bodyAnchor : ARAnchor) -> Float {
+    func getHandAngle(bodyAnchor : ARBodyAnchor) -> Float {
+    
+        let skeleton = bodyAnchor.skeleton
+        
+        let handIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightHand)
+        let handModelTransform = skeleton.jointModelTransforms[handIndex]
+        let handTranslation = Transform(matrix: handModelTransform).translation
+        let shoulderIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightShoulder)
+        let shoulderModelTransform = skeleton.jointModelTransforms[shoulderIndex]
+        let shoulderTranslation = Transform(matrix: shoulderModelTransform).translation
+        
+//        let joint1 = skeleton.jointModelTransforms(for: ARSkeleton.JointName.leftHand)
+//        let joint2 = skeleton.jointModelTransforms(for: ARSkeleton.JointName.leftShoulder)
+        let angle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
+//        let jointTransforms = skeleton.jointLocalTransforms
+//
+//        for (i, jointTransform) in jointTransforms.enumerated() {
+//          print(Transform(matrix: jointTransform).translation)
+//        }
+        
+        return angle
+    }
+    
+    func makeDegreeStringPretty(deg: Float) -> String {
+        let s = Float(floor(10 * deg) / 10)
+        return "\(s) degrees"
+    }
+    
+    // This fuction is calculating the angle from the origin to point1, and the angle from the origin to point2
+    // then calculating the difference between the angles
+    func getAngleFromXYZ(point1: SIMD3<Float>, point2: SIMD3<Float>) -> Float{
+        
+        var tangent1 = ( pow(point1[0], 2) + pow(point1[1], 2) + pow(point1[2], 2) ).squareRoot()
+        
+        var tangent2 = ( pow(point2[0], 2) + pow(point2[1], 2) + pow(point2[2], 2) ).squareRoot()
+        
+        var angle1 = acos(point1[0]/tangent1)
+        
+        var angle2 = acos(point2[0]/tangent2)
+        
+        var rads = angle1 - angle2
+        
+        var degs = rads * 180 / Float.pi
+        
+        return Float(degs)
+    }
+    
+    func getAngleFromXYZ2(point1: SIMD3<Float>, point2: SIMD3<Float>) -> Float{
+    
+        let numerator = point1[0]*point2[0] + point1[1]*point2[1] + point1[2]*point2[2]
+        
+        let denom1 = pow(point1[0],2) + pow(point1[1],2) + pow(point1[2],2)
+        let denom2 = pow(point2[0],2) + pow(point2[1],2) + pow(point2[2],2)
+        
+        let denom = (denom1*denom2).squareRoot()
+        
+        var rads = acos(numerator/denom)
+        
+        var degs = rads * 180 / Float.pi
+        
+        return Float(degs)
+    }
+    
+    func getAngleFromXYZ3(point1: SIMD3<Float>, origin: SIMD3<Float>) -> Float{
+        
+        let xDiff = point1[0] - origin[0]
+        let yDiff = point1[1] - origin[1]
+        let zDiff = point1[2] - origin[2]
         
         
-        return 3.0
+        var tangent1 = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
+        
+        var angle1 = atan(yDiff/tangent1)
+        
+        var degs = angle1 * 180 / Float.pi
+        
+        return Float(degs)
     }
 }
