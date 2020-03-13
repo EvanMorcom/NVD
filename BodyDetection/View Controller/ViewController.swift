@@ -12,6 +12,58 @@ import Combine
 import ReplayKit
 import Photos
 
+struct Position3D: Codable{
+    var x: Float
+    var y: Float
+    var z: Float
+}
+
+struct SkeletonPositions: Codable{
+    var rightHand: Position3D
+    var leftHand: Position3D
+    var rightFoot: Position3D
+    var leftFoot: Position3D
+    var rightShoulder: Position3D
+    var leftShoulder: Position3D
+    var hip: Position3D
+    var head: Position3D
+}
+
+func mapJointToPosition3D(arSkeleton: ARSkeleton3D, jointName: ARSkeleton.JointName) -> Position3D {
+        
+    let index = ARSkeletonDefinition.defaultBody3D.index(for: jointName)
+    let modelTransform = arSkeleton.jointModelTransforms[index]
+    let position = Transform(matrix: modelTransform).translation
+    
+    let mappedValues = Position3D(x: position[0], y: position[1], z: position[2])
+    
+    return mappedValues
+}
+
+func mapARSkeletonToStruct(arSkeleton: ARSkeleton3D) -> SkeletonPositions {
+    
+    let skeletonPositions = SkeletonPositions(rightHand: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightHand), leftHand: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftHand), rightFoot: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightFoot), leftFoot: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftFoot),rightShoulder: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightShoulder),leftShoulder: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftShoulder) ,hip: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .root), head: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .head))
+    
+    return skeletonPositions
+}
+
+struct Frame: Codable {
+    var skeleton: SkeletonPositions
+    var timestamp: Int
+    
+    init(arSkeleton: ARSkeleton3D, timestamp: Int){
+        self.skeleton =  mapARSkeletonToStruct(arSkeleton: arSkeleton)
+        self.timestamp = timestamp
+    }
+}
+
+func saveFrame(frame: [Frame]) {
+    
+    for f in frame {
+        print(f)
+    }
+}
+
 class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControllerDelegate {
     
     @IBOutlet var recordButton: UIButton!
@@ -19,9 +71,13 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     @IBOutlet var arView: ARView!
     @IBOutlet var timerView: UIView!
     @IBOutlet var timerLabel: UILabel!
-    @IBOutlet weak var handAngleLabel: UILabel!
+    @IBOutlet weak var rightHandAngleLabel: UILabel!
+    @IBOutlet weak var leftHandleAngleLabel: UILabel!
+    @IBOutlet weak var rightFootAngleLabel: UILabel!
     
-    // write transform data to json
+    
+//    let encoder = JSONEncoder()
+    
     var printoutText: String = ""
     
     // controls recording
@@ -44,7 +100,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
      shouldShowData = !shouldShowData
      }
      */
-    
+
     var timer: Timer?
     var timeElapsed: Double = 0.0
     var milliseconds: Int = 0
@@ -387,9 +443,20 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             characterAnchor.orientation = Transform(matrix: bodyAnchor.transform).rotation
             
             // Do some math
-            var handAngle = makeDegreeStringPretty(deg: getHandAngle(bodyAnchor: bodyAnchor))
+            var rightHandAngle = makeDegreeStringPretty(deg: getRightHandAngle(bodyAnchor: bodyAnchor))
+            
+            // Do some math
+            var leftHandAngle = makeDegreeStringPretty(deg: getLeftHandAngle(bodyAnchor: bodyAnchor))
+            
+            var rightFootAngle = makeDegreeStringPretty(deg: getRightLegAngle(bodyAnchor: bodyAnchor))
+            
             // Update label
-            self.handAngleLabel.text = String(describing: handAngle)
+            self.rightHandAngleLabel.text = String(describing: rightHandAngle)
+            self.leftHandleAngleLabel.text = String(describing: leftHandAngle)
+            self.rightFootAngleLabel.text = String(describing: rightFootAngle)
+            
+            let frame = Frame(arSkeleton: bodyAnchor.skeleton, timestamp: 14)
+            saveFrame(frame: frame)
             
             if let character = character, character.parent == nil {
                 // Attach the character to its anchor as soon as
@@ -412,7 +479,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         }
     }
     
-    func getHandAngle(bodyAnchor : ARBodyAnchor) -> Float {
+    func getRightHandAngle(bodyAnchor : ARBodyAnchor) -> Float {
     
         let skeleton = bodyAnchor.skeleton
         
@@ -422,17 +489,39 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         let shoulderIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightShoulder)
         let shoulderModelTransform = skeleton.jointModelTransforms[shoulderIndex]
         let shoulderTranslation = Transform(matrix: shoulderModelTransform).translation
+        let rightAngle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
         
-//        let joint1 = skeleton.jointModelTransforms(for: ARSkeleton.JointName.leftHand)
-//        let joint2 = skeleton.jointModelTransforms(for: ARSkeleton.JointName.leftShoulder)
-        let angle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
-//        let jointTransforms = skeleton.jointLocalTransforms
-//
-//        for (i, jointTransform) in jointTransforms.enumerated() {
-//          print(Transform(matrix: jointTransform).translation)
-//        }
+        return rightAngle
+    }
+
+    func getRightLegAngle(bodyAnchor : ARBodyAnchor) -> Float {
+    
+        let skeleton = bodyAnchor.skeleton
         
-        return angle
+        let footIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightFoot)
+        let footModelTransform = skeleton.jointModelTransforms[footIndex]
+        let footTranslation = Transform(matrix: footModelTransform).translation
+        let hipIndex = ARSkeletonDefinition.defaultBody3D.index(for: .root)
+        let hipModelTransform = skeleton.jointModelTransforms[hipIndex]
+        let hipTranslation = Transform(matrix: hipModelTransform).translation
+        let rightAngle = getAngleFromXYZ3(point1: footTranslation, origin: hipTranslation)
+        
+        return rightAngle
+    }
+    
+    func getLeftHandAngle(bodyAnchor : ARBodyAnchor) -> Float {
+    
+        let skeleton = bodyAnchor.skeleton
+        
+        let handIndex = ARSkeletonDefinition.defaultBody3D.index(for: .leftHand)
+        let handModelTransform = skeleton.jointModelTransforms[handIndex]
+        let handTranslation = Transform(matrix: handModelTransform).translation
+        let shoulderIndex = ARSkeletonDefinition.defaultBody3D.index(for: .leftShoulder)
+        let shoulderModelTransform = skeleton.jointModelTransforms[shoulderIndex]
+        let shoulderTranslation = Transform(matrix: shoulderModelTransform).translation
+        let leftAngle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
+        
+        return leftAngle
     }
     
     func makeDegreeStringPretty(deg: Float) -> String {
