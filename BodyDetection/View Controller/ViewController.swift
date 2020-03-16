@@ -57,11 +57,14 @@ struct Frame: Codable {
     }
 }
 
-func saveFrame(frame: [Frame]) {
-    
-    for f in frame {
-        print(f)
-    }
+func saveFrame(frames: [Frame]) {
+    do {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let jsonData = try encoder.encode(frames)
+        let jsonString = String(data: jsonData, encoding: .utf8)!
+        print(jsonString)
+    } catch { print(error) }
 }
 
 class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControllerDelegate {
@@ -74,32 +77,18 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     @IBOutlet weak var rightHandAngleLabel: UILabel!
     @IBOutlet weak var leftHandleAngleLabel: UILabel!
     @IBOutlet weak var rightFootAngleLabel: UILabel!
-    
-    
-//    let encoder = JSONEncoder()
-    
+
     var printoutText: String = ""
     
     // controls recording
     var isRecording = false
     let recorder = RPScreenRecorder.shared()
+    var recordedFrames = [Frame].init()
     
     // attempting to bypass preview view controller:
     var videoOutputURL: URL = URL(fileURLWithPath: "")
     var videoWriter: AVAssetWriter?
     var videoWriterInput: AVAssetWriterInput?
-    
-    /*
-     @IBAction func showDataPressed(_ sender: Any) {
-     if shouldShowData {
-     printoutTextView.text = printoutText
-     printoutTextView.alpha = 1
-     } else {
-     printoutTextView.alpha = 0
-     }
-     shouldShowData = !shouldShowData
-     }
-     */
 
     var timer: Timer?
     var timeElapsed: Double = 0.0
@@ -241,14 +230,15 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             }
             
             print("Started Recording Successfully")
-            //            self.isRecording = true
+            
+            self.clearFramesList()
+            self.isRecording = true
             self.presentTimer()
             self.recordButton.setTitle("Stop", for: .normal)
             self.recordButton.layer.cornerRadius = 10
             self.recordButtonView.layer.cornerRadius = 10
 //            self.recordButtonView.animateCornerRadius(from: self.recordButtonView.layer.frame.height / 2, to: 10, duration: 0.25)
             self.timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true, block: { (timer) in
-                self.updateTimerLabel()
             })
         }
         
@@ -288,6 +278,8 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             
             // reset timer, record button
             self.isRecording = false
+            
+            saveFrame(frames: self.recordedFrames)
             
             self.timer?.invalidate()
             self.milliseconds = 0
@@ -438,25 +430,39 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             // Update the position of the character anchor's position.
             let bodyPosition = simd_make_float3(bodyAnchor.transform.columns.3)
             characterAnchor.position = bodyPosition + characterOffset
+            
             // Also copy over the rotation of the body anchor, because the skeleton's pose
             // in the world is relative to the body anchor's rotation.
             characterAnchor.orientation = Transform(matrix: bodyAnchor.transform).rotation
             
+//            // Do some math
+//            let rightHandAngle = makeDegreeStringPretty(deg: getRightHandAngle(bodyAnchor: bodyAnchor))
+//
+//            // Do some math
+//            let leftHandAngle = makeDegreeStringPretty(deg: getLeftHandAngle(bodyAnchor: bodyAnchor))
+//
+//            let rightFootAngle = makeDegreeStringPretty(deg: getRightLegAngle(bodyAnchor: bodyAnchor))
+//
             // Do some math
-            var rightHandAngle = makeDegreeStringPretty(deg: getRightHandAngle(bodyAnchor: bodyAnchor))
-            
-            // Do some math
-            var leftHandAngle = makeDegreeStringPretty(deg: getLeftHandAngle(bodyAnchor: bodyAnchor))
-            
-            var rightFootAngle = makeDegreeStringPretty(deg: getRightLegAngle(bodyAnchor: bodyAnchor))
-            
+              // Do some math
             // Update label
+
+            let frame = Frame(arSkeleton: bodyAnchor.skeleton, timestamp: milliseconds)
+
+            let rightHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.rightHand , origin: frame.skeleton.rightShoulder))
+              
+            let leftHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftHand, origin: frame.skeleton.leftShoulder))
+            
+            let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.rightFoot, origin: frame.skeleton.hip))
+            let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftFoot, origin: frame.skeleton.hip))
+                
             self.rightHandAngleLabel.text = String(describing: rightHandAngle)
             self.leftHandleAngleLabel.text = String(describing: leftHandAngle)
             self.rightFootAngleLabel.text = String(describing: rightFootAngle)
             
-            let frame = Frame(arSkeleton: bodyAnchor.skeleton, timestamp: 14)
-            saveFrame(frame: frame)
+            if(self.isRecording){
+                addFrameToList(frame: frame)
+            }
             
             if let character = character, character.parent == nil {
                 // Attach the character to its anchor as soon as
@@ -492,6 +498,23 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         let rightAngle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
         
         return rightAngle
+    }
+    
+    
+    // get angle on XY plane relative to x-axis
+    func getAngleFromXYZ(point: Position3D, origin: Position3D) -> Float{
+            
+        let xDiff = point.x - origin.x
+        let yDiff = point.y - origin.y
+        let zDiff = point.z - origin.z
+        
+        let zxLength = ( pow(xDiff, 2) + pow(zDiff, 2)).squareRoot()
+        
+        let angle = atan(yDiff/zxLength)
+        
+        let degs = angle * 180 / Float.pi
+        
+        return Float(degs)
     }
 
     func getRightLegAngle(bodyAnchor : ARBodyAnchor) -> Float {
@@ -533,17 +556,17 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     // then calculating the difference between the angles
     func getAngleFromXYZ(point1: SIMD3<Float>, point2: SIMD3<Float>) -> Float{
         
-        var tangent1 = ( pow(point1[0], 2) + pow(point1[1], 2) + pow(point1[2], 2) ).squareRoot()
+        let tangent1 = ( pow(point1[0], 2) + pow(point1[1], 2) + pow(point1[2], 2) ).squareRoot()
         
-        var tangent2 = ( pow(point2[0], 2) + pow(point2[1], 2) + pow(point2[2], 2) ).squareRoot()
+        let tangent2 = ( pow(point2[0], 2) + pow(point2[1], 2) + pow(point2[2], 2) ).squareRoot()
         
-        var angle1 = acos(point1[0]/tangent1)
+        let angle1 = acos(point1[0]/tangent1)
         
-        var angle2 = acos(point2[0]/tangent2)
+        let angle2 = acos(point2[0]/tangent2)
         
-        var rads = angle1 - angle2
+        let rads = angle1 - angle2
         
-        var degs = rads * 180 / Float.pi
+        let degs = rads * 180 / Float.pi
         
         return Float(degs)
     }
@@ -557,9 +580,9 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         
         let denom = (denom1*denom2).squareRoot()
         
-        var rads = acos(numerator/denom)
+        let rads = acos(numerator/denom)
         
-        var degs = rads * 180 / Float.pi
+        let degs = rads * 180 / Float.pi
         
         return Float(degs)
     }
@@ -568,15 +591,25 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         
         let xDiff = point1[0] - origin[0]
         let yDiff = point1[1] - origin[1]
-        let zDiff = point1[2] - origin[2]
+        let tangent1 = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
         
+        let angle1 = atan(yDiff/tangent1)
         
-        var tangent1 = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
-        
-        var angle1 = atan(yDiff/tangent1)
-        
-        var degs = angle1 * 180 / Float.pi
+        let degs = angle1 * 180 / Float.pi
         
         return Float(degs)
     }
+    
+    func addFrameToList(frame: Frame){
+        recordedFrames.append(frame)
+    }
+    
+    func clearFramesList(){
+        recordedFrames.removeAll()
+    }
+    
+//    func scoreJJMidPosition(frame: Frame){
+//        let right_hand_angle = getRightLegAngle(bodyAnchor: frame.skeleton.)
+////        let left_hand_angle = getLeftHandAngle(bodyAnchor: frame.skeleton)
+//    }
 }
