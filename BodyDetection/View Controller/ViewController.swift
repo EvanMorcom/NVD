@@ -454,7 +454,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             let leftHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftHand, origin: frame.skeleton.leftShoulder))
             
             let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.rightFoot, origin: frame.skeleton.hip))
-            let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftFoot, origin: frame.skeleton.hip))
+            let leftFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftFoot, origin: frame.skeleton.hip))
                 
             self.rightHandAngleLabel.text = String(describing: rightHandAngle)
             self.leftHandleAngleLabel.text = String(describing: leftHandAngle)
