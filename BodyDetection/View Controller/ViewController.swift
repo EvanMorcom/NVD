@@ -12,6 +12,12 @@ import Combine
 import ReplayKit
 import Photos
 
+enum Plane {
+    case XY
+    case XZ
+    case YZ
+}
+
 struct Position3D: Codable{
     var x: Float
     var y: Float
@@ -77,7 +83,8 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     @IBOutlet weak var rightHandAngleLabel: UILabel!
     @IBOutlet weak var leftHandleAngleLabel: UILabel!
     @IBOutlet weak var rightFootAngleLabel: UILabel!
-
+    @IBOutlet weak var leftFootAngleLabel: UILabel!
+    
     var printoutText: String = ""
     
     // controls recording
@@ -449,16 +456,17 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
 
             let frame = Frame(arSkeleton: bodyAnchor.skeleton, timestamp: milliseconds)
 
-            let rightHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.rightHand , origin: frame.skeleton.rightShoulder))
+            let rightHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.rightHand , origin: frame.skeleton.rightShoulder, relativePlane: Plane.XZ))
               
-            let leftHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftHand, origin: frame.skeleton.leftShoulder))
+            let leftHandAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.leftHand, origin: frame.skeleton.leftShoulder, relativePlane: Plane.XZ))
             
-            let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.rightFoot, origin: frame.skeleton.hip))
-            let leftFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(point: frame.skeleton.leftFoot, origin: frame.skeleton.hip))
+            let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.rightFoot, origin: frame.skeleton.hip, relativePlane: Plane.XZ))
+            let leftFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.leftFoot, origin: frame.skeleton.hip, relativePlane: Plane.XZ))
                 
             self.rightHandAngleLabel.text = String(describing: rightHandAngle)
             self.leftHandleAngleLabel.text = String(describing: leftHandAngle)
             self.rightFootAngleLabel.text = String(describing: rightFootAngle)
+            self.leftFootAngleLabel.text = String(describing: leftFootAngle)
             
             if(self.isRecording){
                 addFrameToList(frame: frame)
@@ -502,15 +510,26 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     
     
     // get angle on XY plane relative to x-axis
-    func getAngleFromXYZ(point: Position3D, origin: Position3D) -> Float{
+    func getAngleFromXYZ(endPoint: Position3D, origin: Position3D, relativePlane: Plane) -> Float{
             
-        let xDiff = point.x - origin.x
-        let yDiff = point.y - origin.y
-        let zDiff = point.z - origin.z
+        let xDiff = endPoint.x - origin.x
+        let yDiff = endPoint.y - origin.y
+        let zDiff = endPoint.z - origin.z
         
-        let zxLength = ( pow(xDiff, 2) + pow(zDiff, 2)).squareRoot()
+        // The tangent length is used to calculate the angle of the point
+        // the tangent length is defined by a reference plane (specified below)
+        var tangent = Float(0.0)
         
-        let angle = atan(yDiff/zxLength)
+        switch relativePlane{
+        case .XY:
+            tangent = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
+        case .XZ:
+            tangent = ( pow(xDiff, 2) + pow(zDiff, 2)).squareRoot()
+        case .YZ:
+            tangent = ( pow(yDiff, 2) + pow(zDiff, 2)).squareRoot()
+        }
+
+        let angle = atan2(yDiff,tangent)
         
         let degs = angle * 180 / Float.pi
         
