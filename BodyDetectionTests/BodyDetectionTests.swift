@@ -11,19 +11,24 @@ import XCTest
 
 class BodyDetectionTests: XCTestCase {
 
+    var code: ViewController!
+    
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         super.setUp()
-        //var test: BodyDetection
+        
     }
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+        super.tearDown()
     }
 
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+        print("hsdf\n")
+        
     }
 
     func testPerformanceExample() {
@@ -40,7 +45,11 @@ class BodyDetectionTests: XCTestCase {
         
         let origin = Position3D(x: 0.0, y: 0.0,z: 0.0 )
         
-        let angle = BodyDetection.getAngleFromXYZ(endPoint: )
+        let anglePos = code.getAngleFromXYZ(endPoint: endPointPosX, origin: origin, relativePlane: Plane.XZ )
+        let angleNeg = code.getAngleFromXYZ(endPoint: endPointNegX, origin: origin, relativePlane: Plane.XZ )
+        
+        XCTAssertEqual(anglePos, 0.0)
+        XCTAssertEqual(angleNeg, 0.0)
         
         
     }

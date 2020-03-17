@@ -492,24 +492,12 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             }
         }
     }
-    
-    func getRightHandAngle(bodyAnchor : ARBodyAnchor) -> Float {
-    
-        let skeleton = bodyAnchor.skeleton
-        
-        let handIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightHand)
-        let handModelTransform = skeleton.jointModelTransforms[handIndex]
-        let handTranslation = Transform(matrix: handModelTransform).translation
-        let shoulderIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightShoulder)
-        let shoulderModelTransform = skeleton.jointModelTransforms[shoulderIndex]
-        let shoulderTranslation = Transform(matrix: shoulderModelTransform).translation
-        let rightAngle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
-        
-        return rightAngle
-    }
-    
-    
     // get angle on XY plane relative to x-axis
+    
+    // gets the angle betwen two points, relatie to a plane. For reference with respect to a phone being held up vertically recording someone, positive X is to the right, positive Y is up, and positive Z is coming at you.
+    //
+    // All angles are between -90 and 90 degrees, with the value of the 3rd dimension determining the sign of the angle.
+    // Example: If the relative plane is XY then positive Z means the angle is positive and negative Z means the angle is negative
     func getAngleFromXYZ(endPoint: Position3D, origin: Position3D, relativePlane: Plane) -> Float{
             
         let xDiff = endPoint.x - origin.x
@@ -536,35 +524,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         return Float(degs)
     }
 
-    func getRightLegAngle(bodyAnchor : ARBodyAnchor) -> Float {
     
-        let skeleton = bodyAnchor.skeleton
-        
-        let footIndex = ARSkeletonDefinition.defaultBody3D.index(for: .rightFoot)
-        let footModelTransform = skeleton.jointModelTransforms[footIndex]
-        let footTranslation = Transform(matrix: footModelTransform).translation
-        let hipIndex = ARSkeletonDefinition.defaultBody3D.index(for: .root)
-        let hipModelTransform = skeleton.jointModelTransforms[hipIndex]
-        let hipTranslation = Transform(matrix: hipModelTransform).translation
-        let rightAngle = getAngleFromXYZ3(point1: footTranslation, origin: hipTranslation)
-        
-        return rightAngle
-    }
-    
-    func getLeftHandAngle(bodyAnchor : ARBodyAnchor) -> Float {
-    
-        let skeleton = bodyAnchor.skeleton
-        
-        let handIndex = ARSkeletonDefinition.defaultBody3D.index(for: .leftHand)
-        let handModelTransform = skeleton.jointModelTransforms[handIndex]
-        let handTranslation = Transform(matrix: handModelTransform).translation
-        let shoulderIndex = ARSkeletonDefinition.defaultBody3D.index(for: .leftShoulder)
-        let shoulderModelTransform = skeleton.jointModelTransforms[shoulderIndex]
-        let shoulderTranslation = Transform(matrix: shoulderModelTransform).translation
-        let leftAngle = getAngleFromXYZ3(point1: handTranslation, origin: shoulderTranslation)
-        
-        return leftAngle
-    }
     
     func makeDegreeStringPretty(deg: Float) -> String {
         let s = Float(floor(10 * deg) / 10)
@@ -590,43 +550,13 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         return Float(degs)
     }
     
-    func getAngleFromXYZ2(point1: SIMD3<Float>, point2: SIMD3<Float>) -> Float{
-    
-        let numerator = point1[0]*point2[0] + point1[1]*point2[1] + point1[2]*point2[2]
-        
-        let denom1 = pow(point1[0],2) + pow(point1[1],2) + pow(point1[2],2)
-        let denom2 = pow(point2[0],2) + pow(point2[1],2) + pow(point2[2],2)
-        
-        let denom = (denom1*denom2).squareRoot()
-        
-        let rads = acos(numerator/denom)
-        
-        let degs = rads * 180 / Float.pi
-        
-        return Float(degs)
-    }
-    
-    func getAngleFromXYZ3(point1: SIMD3<Float>, origin: SIMD3<Float>) -> Float{
-        
-        let xDiff = point1[0] - origin[0]
-        let yDiff = point1[1] - origin[1]
-        let tangent1 = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
-        
-        let angle1 = atan(yDiff/tangent1)
-        
-        let degs = angle1 * 180 / Float.pi
-        
-        return Float(degs)
+    func clearFramesList(){
+        recordedFrames.removeAll()
     }
     
     func addFrameToList(frame: Frame){
         recordedFrames.append(frame)
     }
-    
-    func clearFramesList(){
-        recordedFrames.removeAll()
-    }
-    
 //    func scoreJJMidPosition(frame: Frame){
 //        let right_hand_angle = getRightLegAngle(bodyAnchor: frame.skeleton.)
 ////        let left_hand_angle = getLeftHandAngle(bodyAnchor: frame.skeleton)

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0C8C7868228387D2006A6EE1 /* character in Resources */ = {isa = PBXBuildFile; fileRef = 0C8C7867228387D2006A6EE1 /* character */; };
+		275DDDA72420579D00511D98 /* BodyDetectionTests2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 275DDDA62420579D00511D98 /* BodyDetectionTests2.swift */; };
 		277686082420494500B7A4B1 /* BodyDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277686072420494500B7A4B1 /* BodyDetectionTests.swift */; };
 		2F60E1DB22631E0F00357E98 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F60E1DA22631E0F00357E98 /* AppDelegate.swift */; };
 		2F60E1DD22631E0F00357E98 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F60E1DC22631E0F00357E98 /* ViewController.swift */; };
@@ -25,6 +26,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		275DDDA92420579D00511D98 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2F60E1B222631DCF00357E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2F60E1D722631E0E00357E98;
+			remoteInfo = BodyDetection;
+		};
 		2776860A2420494500B7A4B1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2F60E1B222631DCF00357E98 /* Project object */;
@@ -36,6 +44,9 @@
 
 /* Begin PBXFileReference section */
 		0C8C7867228387D2006A6EE1 /* character */ = {isa = PBXFileReference; lastKnownFileType = folder; path = character; sourceTree = "<group>"; };
+		275DDDA42420579D00511D98 /* BodyDetectionTests2.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BodyDetectionTests2.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		275DDDA62420579D00511D98 /* BodyDetectionTests2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyDetectionTests2.swift; sourceTree = "<group>"; };
+		275DDDA82420579D00511D98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		277686052420494500B7A4B1 /* BodyDetectionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BodyDetectionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		277686072420494500B7A4B1 /* BodyDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyDetectionTests.swift; sourceTree = "<group>"; };
 		277686092420494500B7A4B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -59,6 +70,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		275DDDA12420579D00511D98 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		277686022420494500B7A4B1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -76,6 +94,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		275DDDA52420579D00511D98 /* BodyDetectionTests2 */ = {
+			isa = PBXGroup;
+			children = (
+				275DDDA62420579D00511D98 /* BodyDetectionTests2.swift */,
+				275DDDA82420579D00511D98 /* Info.plist */,
+			);
+			path = BodyDetectionTests2;
+			sourceTree = "<group>";
+		};
 		277686062420494500B7A4B1 /* BodyDetectionTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -99,6 +126,7 @@
 				718E55BB2289F8FF00A9B13B /* README.md */,
 				2F60E1D922631E0F00357E98 /* BodyDetection */,
 				277686062420494500B7A4B1 /* BodyDetectionTests */,
+				275DDDA52420579D00511D98 /* BodyDetectionTests2 */,
 				2F60E1BB22631DCF00357E98 /* Products */,
 				29819F71B3026A375E893049 /* Configuration */,
 				5CAEF4054B950A25D1A4FF99 /* LICENSE */,
@@ -110,6 +138,7 @@
 			children = (
 				2F60E1D822631E0E00357E98 /* BodyDetection.app */,
 				277686052420494500B7A4B1 /* BodyDetectionTests.xctest */,
+				275DDDA42420579D00511D98 /* BodyDetectionTests2.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -154,6 +183,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		275DDDA32420579D00511D98 /* BodyDetectionTests2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 275DDDAB2420579D00511D98 /* Build configuration list for PBXNativeTarget "BodyDetectionTests2" */;
+			buildPhases = (
+				275DDDA02420579D00511D98 /* Sources */,
+				275DDDA12420579D00511D98 /* Frameworks */,
+				275DDDA22420579D00511D98 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				275DDDAA2420579D00511D98 /* PBXTargetDependency */,
+			);
+			name = BodyDetectionTests2;
+			productName = BodyDetectionTests2;
+			productReference = 275DDDA42420579D00511D98 /* BodyDetectionTests2.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		277686042420494500B7A4B1 /* BodyDetectionTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2776860E2420494500B7A4B1 /* Build configuration list for PBXNativeTarget "BodyDetectionTests" */;
@@ -200,6 +247,10 @@
 				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = Apple;
 				TargetAttributes = {
+					275DDDA32420579D00511D98 = {
+						CreatedOnToolsVersion = 11.3.1;
+						TestTargetID = 2F60E1D722631E0E00357E98;
+					};
 					277686042420494500B7A4B1 = {
 						CreatedOnToolsVersion = 11.3.1;
 						TestTargetID = 2F60E1D722631E0E00357E98;
@@ -224,11 +275,19 @@
 			targets = (
 				2F60E1D722631E0E00357E98 /* BodyDetection */,
 				277686042420494500B7A4B1 /* BodyDetectionTests */,
+				275DDDA32420579D00511D98 /* BodyDetectionTests2 */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		275DDDA22420579D00511D98 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		277686032420494500B7A4B1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -252,6 +311,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		275DDDA02420579D00511D98 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				275DDDA72420579D00511D98 /* BodyDetectionTests2.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		277686012420494500B7A4B1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -278,6 +345,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		275DDDAA2420579D00511D98 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2F60E1D722631E0E00357E98 /* BodyDetection */;
+			targetProxy = 275DDDA92420579D00511D98 /* PBXContainerItemProxy */;
+		};
 		2776860B2420494500B7A4B1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 2F60E1D722631E0E00357E98 /* BodyDetection */;
@@ -305,10 +377,52 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		275DDDAC2420579D00511D98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = WLB73F6M7Q;
+				INFOPLIST_FILE = BodyDetectionTests2/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.trackk.evan.BodyDetectionTests2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BodyDetection.app/BodyDetection";
+			};
+			name = Debug;
+		};
+		275DDDAD2420579D00511D98 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = WLB73F6M7Q;
+				INFOPLIST_FILE = BodyDetectionTests2/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.trackk.evan.BodyDetectionTests2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BodyDetection.app/BodyDetection";
+			};
+			name = Release;
+		};
 		2776860C2420494500B7A4B1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WLB73F6M7Q;
 				INFOPLIST_FILE = BodyDetectionTests/Info.plist;
@@ -330,6 +444,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WLB73F6M7Q;
 				INFOPLIST_FILE = BodyDetectionTests/Info.plist;
@@ -380,7 +496,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -399,7 +515,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -443,7 +559,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -456,7 +572,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -483,7 +599,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.BodyDetectionWLB73F6M7Q";
+				PRODUCT_BUNDLE_IDENTIFIER = com.trackk.evan;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -508,7 +624,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.BodyDetectionWLB73F6M7Q";
+				PRODUCT_BUNDLE_IDENTIFIER = com.trackk.evan;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -520,6 +636,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		275DDDAB2420579D00511D98 /* Build configuration list for PBXNativeTarget "BodyDetectionTests2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				275DDDAC2420579D00511D98 /* Debug */,
+				275DDDAD2420579D00511D98 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		2776860E2420494500B7A4B1 /* Build configuration list for PBXNativeTarget "BodyDetectionTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
