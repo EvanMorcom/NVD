@@ -364,10 +364,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="OS8-Gh-mhv">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Test" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="OS8-Gh-mhv">
                                 <rect key="frame" x="20" y="106" width="374" height="738"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
                                 <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -386,7 +385,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="31H-1T-Yd5"/>
                     <connections>
-                        <outlet property="textV" destination="OS8-Gh-mhv" id="EVP-e6-HPB"/>
+                        <outlet property="textV" destination="OS8-Gh-mhv" id="3w9-GG-c2h"/>
                         <outlet property="textView" destination="OS8-Gh-mhv" id="MRQ-wA-ArJ"/>
                     </connections>
                 </viewController>
@@ -399,6 +398,6 @@
         <image name="trackkLogo" width="473" height="473"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="A4G-Le-lam"/>
+        <segue reference="HbH-5W-2AA"/>
     </inferredMetricsTieBreakers>
 </document>
