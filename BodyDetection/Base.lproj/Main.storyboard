@@ -78,9 +78,11 @@
                                             <constraint firstAttribute="height" constant="70" id="h3r-VT-Wba"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                        <state key="normal" title="Feedback"/>
+                                        <state key="normal" title="Unit Tests"/>
                                         <connections>
                                             <action selector="aboutButtonPressed:" destination="ccU-Db-RyE" eventType="touchUpInside" id="z1B-2E-j2A"/>
+                                            <action selector="unitTestButtonPressed:" destination="ccU-Db-RyE" eventType="touchUpInside" id="8e3-z5-cgu"/>
+                                            <segue destination="dZn-mC-wQn" kind="show" id="HbH-5W-2AA"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -384,6 +386,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="31H-1T-Yd5"/>
                     <connections>
+                        <outlet property="textV" destination="OS8-Gh-mhv" id="EVP-e6-HPB"/>
                         <outlet property="textView" destination="OS8-Gh-mhv" id="MRQ-wA-ArJ"/>
                     </connections>
                 </viewController>
@@ -395,4 +398,7 @@
     <resources>
         <image name="trackkLogo" width="473" height="473"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="A4G-Le-lam"/>
+    </inferredMetricsTieBreakers>
 </document>

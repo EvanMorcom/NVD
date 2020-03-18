@@ -73,6 +73,38 @@ func saveFrame(frames: [Frame]) {
     } catch { print(error) }
 }
 
+
+//  Gets the angle betwen two points, relatie to a plane. For reference with respect to a phone being held up vertically recording someone, positive X is to the right, positive Y is up, and positive Z is coming at you.
+//
+// All angles are between -90 and 90 degrees, with the value of the 3rd dimension determining the sign of the angle.
+// Example: If the relative plane is XY then positive Z means the angle is positive and negative Z means the angle is negative
+func getAngleFromXYZ(endPoint: Position3D, origin: Position3D, relativePlane: Plane) -> Float{
+        
+    let xDiff = endPoint.x - origin.x
+    let yDiff = endPoint.y - origin.y
+    let zDiff = endPoint.z - origin.z
+    
+    // The tangent length is used to calculate the angle of the point
+    // the tangent length is defined by a reference plane (specified below)
+    var tangent = Float(0.0)
+    
+    switch relativePlane{
+    case .XY:
+        tangent = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
+    case .XZ:
+        tangent = ( pow(xDiff, 2) + pow(zDiff, 2)).squareRoot()
+    case .YZ:
+        tangent = ( pow(yDiff, 2) + pow(zDiff, 2)).squareRoot()
+    }
+
+    let angle = atan2(yDiff,tangent)
+    
+    let degs = angle * 180 / Float.pi
+    
+    return Float(degs)
+}
+
+
 class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControllerDelegate {
     
     @IBOutlet var recordButton: UIButton!
@@ -492,63 +524,12 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             }
         }
     }
-    // get angle on XY plane relative to x-axis
-    
-    // gets the angle betwen two points, relatie to a plane. For reference with respect to a phone being held up vertically recording someone, positive X is to the right, positive Y is up, and positive Z is coming at you.
-    //
-    // All angles are between -90 and 90 degrees, with the value of the 3rd dimension determining the sign of the angle.
-    // Example: If the relative plane is XY then positive Z means the angle is positive and negative Z means the angle is negative
-    func getAngleFromXYZ(endPoint: Position3D, origin: Position3D, relativePlane: Plane) -> Float{
-            
-        let xDiff = endPoint.x - origin.x
-        let yDiff = endPoint.y - origin.y
-        let zDiff = endPoint.z - origin.z
-        
-        // The tangent length is used to calculate the angle of the point
-        // the tangent length is defined by a reference plane (specified below)
-        var tangent = Float(0.0)
-        
-        switch relativePlane{
-        case .XY:
-            tangent = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
-        case .XZ:
-            tangent = ( pow(xDiff, 2) + pow(zDiff, 2)).squareRoot()
-        case .YZ:
-            tangent = ( pow(yDiff, 2) + pow(zDiff, 2)).squareRoot()
-        }
-
-        let angle = atan2(yDiff,tangent)
-        
-        let degs = angle * 180 / Float.pi
-        
-        return Float(degs)
-    }
-
-    
     
     func makeDegreeStringPretty(deg: Float) -> String {
         let s = Float(floor(10 * deg) / 10)
         return "\(s) degrees"
     }
-    
-    // This fuction is calculating the angle from the origin to point1, and the angle from the origin to point2
-    // then calculating the difference between the angles
-    func getAngleFromXYZ(point1: SIMD3<Float>, point2: SIMD3<Float>) -> Float{
-        
-        let tangent1 = ( pow(point1[0], 2) + pow(point1[1], 2) + pow(point1[2], 2) ).squareRoot()
-        
-        let tangent2 = ( pow(point2[0], 2) + pow(point2[1], 2) + pow(point2[2], 2) ).squareRoot()
-        
-        let angle1 = acos(point1[0]/tangent1)
-        
-        let angle2 = acos(point2[0]/tangent2)
-        
-        let rads = angle1 - angle2
-        
-        let degs = rads * 180 / Float.pi
-        
-        return Float(degs)
-    }
+
     
     func clearFramesList(){
         recordedFrames.removeAll()

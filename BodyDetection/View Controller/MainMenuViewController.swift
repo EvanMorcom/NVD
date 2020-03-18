@@ -45,6 +45,16 @@ class MainMenuViewController: UIViewController, ModalViewControllerDelegate {
         self.overlayBlurredBackgroundView()
     }
     
+    @IBAction func unitTestButtonPressed(_ sender: Any) {
+        if let button = sender as? UIButton {
+            button.pulse()
+        }
+        self.definesPresentationContext = true
+        self.providesPresentationContextTransitionStyle = true
+        
+        self.overlayBlurredBackgroundView()
+    }
+    
     func overlayBlurredBackgroundView() {
         
         let blurredBackgroundView = UIVisualEffectView()
