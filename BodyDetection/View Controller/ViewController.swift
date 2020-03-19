@@ -48,7 +48,7 @@ func mapJointToPosition3D(arSkeleton: ARSkeleton3D, jointName: ARSkeleton.JointN
 
 func mapARSkeletonToStruct(arSkeleton: ARSkeleton3D) -> SkeletonPositions {
     
-    let skeletonPositions = SkeletonPositions(rightHand: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightHand), leftHand: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftHand), rightFoot: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightFoot), leftFoot: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftFoot),rightShoulder: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightShoulder),leftShoulder: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftShoulder) ,hip: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .root), head: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .head))
+    let skeletonPositions = SkeletonPositions(rightHand: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightHand), leftHand: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftHand), rightFoot: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightFoot), leftFoot: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftFoot), rightShoulder: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .rightShoulder),leftShoulder: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .leftShoulder) ,hip: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .root), head: mapJointToPosition3D(arSkeleton: arSkeleton, jointName: .head))
     
     return skeletonPositions
 }
@@ -73,7 +73,6 @@ func saveFrame(frames: [Frame]) {
     } catch { print(error) }
 }
 
-
 //  Gets the angle betwen two points, relatie to a plane. For reference with respect to a phone being held up vertically recording someone, positive X is to the right, positive Y is up, and positive Z is coming at you.
 //
 // All angles are between -90 and 90 degrees, with the value of the 3rd dimension determining the sign of the angle.
@@ -87,23 +86,76 @@ func getAngleFromXYZ(endPoint: Position3D, origin: Position3D, relativePlane: Pl
     // The tangent length is used to calculate the angle of the point
     // the tangent length is defined by a reference plane (specified below)
     var tangent = Float(0.0)
+    var diff = Float(0.0)
     
     switch relativePlane{
     case .XY:
         tangent = ( pow(xDiff, 2) + pow(yDiff, 2)).squareRoot()
+        diff = zDiff
     case .XZ:
         tangent = ( pow(xDiff, 2) + pow(zDiff, 2)).squareRoot()
+        diff = yDiff
     case .YZ:
         tangent = ( pow(yDiff, 2) + pow(zDiff, 2)).squareRoot()
+        diff = zDiff
     }
 
-    let angle = atan2(yDiff,tangent)
+    let angle = atan2(diff, tangent)
     
     let degs = angle * 180 / Float.pi
     
     return Float(degs)
 }
 
+
+// This function uses the square of the distance of the arm angles from the neutral 'T' pose position
+// to act as a score for the current jumping-jack Frame
+func scoreJumpingJackNeutral(frame: Frame) -> Float {
+        
+    let skeleton = frame.skeleton
+    let rightArmAngle = getAngleFromXYZ(endPoint: skeleton.rightHand, origin: skeleton.rightShoulder, relativePlane: Plane.XZ)
+    let leftArmAngle = getAngleFromXYZ(endPoint: skeleton.leftHand, origin: skeleton.leftShoulder, relativePlane: Plane.XZ)
+    
+    
+    // The max score for the neutral position is when the arm angles are as close to zero as possible
+    let max_deviation = pow(Float(90.0), 2) + pow(Float(90.0), 2)
+    let score =  (max_deviation - (pow(rightArmAngle, 2) + pow(leftArmAngle, 2)))/1600.0
+    
+    return score
+}
+
+func scoreJumpingJackTop(frame: Frame) -> Float {
+        
+    let skeleton = frame.skeleton
+    let rightArmAngle = getAngleFromXYZ(endPoint: skeleton.rightHand, origin: skeleton.rightShoulder, relativePlane: Plane.XZ)
+    let leftArmAngle = getAngleFromXYZ(endPoint: skeleton.leftHand, origin: skeleton.leftShoulder, relativePlane: Plane.XZ)
+    
+    // Since we are squaring to get the score, we must check if the angles are negative (and thus the 'bottom' JJ position)
+    if( rightArmAngle < 0.0 && leftArmAngle < 0.0) {
+        return 0.0;
+    }
+    // The max score for the top position is when the arm angles are as close to 90 as possible
+    let score = (pow(rightArmAngle, 2) + pow(leftArmAngle, 2))/1600.0
+    
+    return score
+}
+
+
+func scoreJumpingJackBottom(frame: Frame) -> Float {
+        
+    let skeleton = frame.skeleton
+    let rightArmAngle = getAngleFromXYZ(endPoint: skeleton.rightHand, origin: skeleton.rightShoulder, relativePlane: Plane.XZ)
+    let leftArmAngle = getAngleFromXYZ(endPoint: skeleton.leftHand, origin: skeleton.leftShoulder, relativePlane: Plane.XZ)
+    
+    // Since we are squaring to get the score, we must check if the angles are negative (and thus the 'bottom' JJ position)
+    if( rightArmAngle > 0.0 && leftArmAngle > 0.0) {
+        return 0.0;
+    }
+    // The max score for the top position is when the arm angles are as close to 90 as possible
+    let score = (pow(rightArmAngle, 2) + pow(leftArmAngle, 2))/1600.0
+    
+    return score
+}
 
 class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControllerDelegate {
     
@@ -116,6 +168,9 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     @IBOutlet weak var leftHandleAngleLabel: UILabel!
     @IBOutlet weak var rightFootAngleLabel: UILabel!
     @IBOutlet weak var leftFootAngleLabel: UILabel!
+    @IBOutlet weak var neutralScore: UILabel!
+    @IBOutlet weak var topScore: UILabel!
+    @IBOutlet weak var bottomScore: UILabel!
     
     var printoutText: String = ""
     
@@ -427,6 +482,9 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         
         // Run a body tracking configration.
         let configuration = ARBodyTrackingConfiguration()
+        
+        configuration.automaticImageScaleEstimationEnabled = true
+        
         arView.session.run(configuration)
         
         arView.scene.addAnchor(characterAnchor)
@@ -495,10 +553,20 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.rightFoot, origin: frame.skeleton.hip, relativePlane: Plane.XZ))
             let leftFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.leftFoot, origin: frame.skeleton.hip, relativePlane: Plane.XZ))
                 
-            self.rightHandAngleLabel.text = String(describing: rightHandAngle)
-            self.leftHandleAngleLabel.text = String(describing: leftHandAngle)
-            self.rightFootAngleLabel.text = String(describing: rightFootAngle)
-            self.leftFootAngleLabel.text = String(describing: leftFootAngle)
+            
+            // Score each frame on the 3 'snapshots' of a JJ
+            let jjNeutralScore = scoreJumpingJackNeutral(frame: frame)
+            let jjBottomScore = scoreJumpingJackBottom(frame: frame)
+            let jjTopScore = scoreJumpingJackTop(frame: frame)
+            
+            self.rightHandAngleLabel.text = "Right Hand " + String(describing: rightHandAngle)
+            self.leftHandleAngleLabel.text = "Left Hand " + String(describing: leftHandAngle)
+            self.rightFootAngleLabel.text = "Right Foot " + String(describing: rightFootAngle)
+            self.leftFootAngleLabel.text = "Left Foot " + String(describing: leftFootAngle)
+            
+            self.neutralScore.text = String(describing: jjNeutralScore)
+            self.topScore.text = String(describing: jjTopScore)
+            self.bottomScore.text = String(describing: jjBottomScore)
             
             if(self.isRecording){
                 addFrameToList(frame: frame)
