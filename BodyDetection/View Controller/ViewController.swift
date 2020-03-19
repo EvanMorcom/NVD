@@ -564,8 +564,8 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             self.rightFootAngleLabel.text = "Right Foot " + String(describing: rightFootAngle)
             self.leftFootAngleLabel.text = "Left Foot " + String(describing: leftFootAngle)
             
-            self.neutralScore.text = String(describing: jjNeutralScore)
-            self.topScore.text = String(describing: jjTopScore)
+            self.neutralScore.text = String(describing: frame.skeleton.rightHand)
+            self.topScore.text = String(describing: frame.skeleton.rightShoulder)
             self.bottomScore.text = String(describing: jjBottomScore)
             
             if(self.isRecording){
