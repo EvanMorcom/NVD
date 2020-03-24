@@ -12,6 +12,9 @@ import Combine
 import ReplayKit
 import Photos
 
+
+let maxHandAngle = 60.0 // degrees
+
 enum Plane {
     case XY
     case XZ
@@ -110,7 +113,7 @@ func getAngleFromXYZ(endPoint: Position3D, origin: Position3D, relativePlane: Pl
 
 // This function uses the square of the distance of the arm angles from the neutral 'T' pose position
 // to act as a score for the current jumping-jack Frame
-func scoreJumpingJackNeutral(frame: Frame) -> Float {
+func scoreJumpingJackMiddle(frame: Frame) -> Float {
         
     let skeleton = frame.skeleton
     let rightArmAngle = getAngleFromXYZ(endPoint: skeleton.rightHand, origin: skeleton.rightShoulder, relativePlane: Plane.XZ)
@@ -118,8 +121,8 @@ func scoreJumpingJackNeutral(frame: Frame) -> Float {
     
     
     // The max score for the neutral position is when the arm angles are as close to zero as possible
-    let max_deviation = pow(Float(90.0), 2) + pow(Float(90.0), 2)
-    let score =  (max_deviation - (pow(rightArmAngle, 2) + pow(leftArmAngle, 2)))/1600.0
+    let max_deviation = pow(Float(maxHandAngle), 2) + pow(Float(maxHandAngle), 2)
+    let score =  (max_deviation - (pow(rightArmAngle, 2) + pow(leftArmAngle, 2)))
     
     return score
 }
@@ -130,12 +133,13 @@ func scoreJumpingJackTop(frame: Frame) -> Float {
     let rightArmAngle = getAngleFromXYZ(endPoint: skeleton.rightHand, origin: skeleton.rightShoulder, relativePlane: Plane.XZ)
     let leftArmAngle = getAngleFromXYZ(endPoint: skeleton.leftHand, origin: skeleton.leftShoulder, relativePlane: Plane.XZ)
     
+    // The max score for the top position is when the arm angles are as close to 90 as possible
+    let score = (pow(rightArmAngle, 2) + pow(leftArmAngle, 2))
+    
     // Since we are squaring to get the score, we must check if the angles are negative (and thus the 'bottom' JJ position)
     if( rightArmAngle < 0.0 && leftArmAngle < 0.0) {
-        return 0.0;
+        return -1*score
     }
-    // The max score for the top position is when the arm angles are as close to 90 as possible
-    let score = (pow(rightArmAngle, 2) + pow(leftArmAngle, 2))/1600.0
     
     return score
 }
@@ -147,14 +151,43 @@ func scoreJumpingJackBottom(frame: Frame) -> Float {
     let rightArmAngle = getAngleFromXYZ(endPoint: skeleton.rightHand, origin: skeleton.rightShoulder, relativePlane: Plane.XZ)
     let leftArmAngle = getAngleFromXYZ(endPoint: skeleton.leftHand, origin: skeleton.leftShoulder, relativePlane: Plane.XZ)
     
+    // The max score for the top position is when the arm angles are as close to 90 as possible
+    let score = (pow(rightArmAngle, 2) + pow(leftArmAngle, 2))
+    
     // Since we are squaring to get the score, we must check if the angles are negative (and thus the 'bottom' JJ position)
     if( rightArmAngle > 0.0 && leftArmAngle > 0.0) {
-        return 0.0;
+        return -1*score
     }
-    // The max score for the top position is when the arm angles are as close to 90 as possible
-    let score = (pow(rightArmAngle, 2) + pow(leftArmAngle, 2))/1600.0
     
     return score
+}
+
+
+struct JumpingJackScores{
+    var top: Float
+    var mid: Float
+    var bottom: Float
+}
+
+func scoreJumpingJack(frames: [Frame]) -> [JumpingJackScores] {
+    
+    var scores = JumpingJackScores(top: 0.0, mid: 0.0, bottom: 0.0)
+    var all_scores = [JumpingJackScores]()
+    
+    for frame in frames{
+        scores.top = scoreJumpingJackTop(frame: frame)
+        scores.mid = scoreJumpingJackMiddle(frame: frame)
+        scores.bottom = scoreJumpingJackBottom(frame: frame)
+        all_scores.append(scores)
+    }
+    
+    return all_scores
+}
+
+func printJJ(scores: [JumpingJackScores]){
+    for score in scores {
+        print("\(score.top) \(score.mid) \(score.bottom)")
+    }
 }
 
 class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControllerDelegate {
@@ -370,10 +403,16 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             alert.addAction(deleteAction)
             self.present(alert, animated: true, completion: nil)
             
+            let scores = scoreJumpingJack(frames: self.recordedFrames)
+            
+            printJJ(scores: scores)
+            
             // reset timer, record button
             self.isRecording = false
             
             saveFrame(frames: self.recordedFrames)
+            
+            
             
             self.timer?.invalidate()
             self.milliseconds = 0
@@ -555,7 +594,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
                 
             
             // Score each frame on the 3 'snapshots' of a JJ
-            let jjNeutralScore = scoreJumpingJackNeutral(frame: frame)
+            let jjNeutralScore = scoreJumpingJackMiddle(frame: frame)
             let jjBottomScore = scoreJumpingJackBottom(frame: frame)
             let jjTopScore = scoreJumpingJackTop(frame: frame)
             
