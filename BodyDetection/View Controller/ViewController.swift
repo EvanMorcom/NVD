@@ -169,24 +169,75 @@ struct JumpingJackScores{
     var bottom: Float
 }
 
-func scoreJumpingJack(frames: [Frame]) -> [JumpingJackScores] {
+func scoreJumpingJack(frames: [Frame]) -> [[Float]] {
     
-    var scores = JumpingJackScores(top: 0.0, mid: 0.0, bottom: 0.0)
-    var all_scores = [JumpingJackScores]()
+    var topScores = [Float]()
+    var middleScores = [Float]()
+    var bottomScores = [Float]()
+    
     
     for frame in frames{
-        scores.top = scoreJumpingJackTop(frame: frame)
-        scores.mid = scoreJumpingJackMiddle(frame: frame)
-        scores.bottom = scoreJumpingJackBottom(frame: frame)
-        all_scores.append(scores)
+        topScores.append(scoreJumpingJackTop(frame: frame))
+        middleScores.append(scoreJumpingJackMiddle(frame: frame))
+        bottomScores.append(scoreJumpingJackBottom(frame: frame))
     }
     
-    return all_scores
+    return [topScores, middleScores, bottomScores]
 }
+//
+//func printJJ(scores: [JumpingJackScores]){
+//    for score in scores {
+//        print("\(score.top) \(score.mid) \(score.bottom)")
+//    }
+//}
 
-func printJJ(scores: [JumpingJackScores]){
-    for score in scores {
-        print("\(score.top) \(score.mid) \(score.bottom)")
+extension Collection where Element: Comparable {
+    func localMaxima() -> [Element] {
+        return localMaxima(in: startIndex..<endIndex)
+    }
+
+    func localMaxima(in range: Range<Index>) -> [Element] {
+        var slice = self[range]
+        var maxima = [Element]()
+
+        var previousIndex: Index? = nil
+        var currentIndex = slice.startIndex
+        var nextIndex = slice.index(after: currentIndex)
+
+        while currentIndex < slice.endIndex {
+            defer {
+                previousIndex = currentIndex
+                currentIndex = nextIndex
+                nextIndex = slice.index(after: nextIndex)
+            }
+
+            let current = slice[currentIndex]
+            let next = slice[nextIndex]
+
+            // For the first element, there is no previous
+            if previousIndex == nil, Swift.max(current, next) == current {
+                maxima.append(current)
+                continue
+            }
+
+            // For the last element, there is no next
+            if nextIndex == slice.endIndex {
+                let previous = slice[previousIndex!]
+                if Swift.max(previous, current) == current {
+                    maxima.append(current)
+                }
+                continue
+            }
+
+            let previous = slice[previousIndex!]
+
+            let maximum = Swift.max(previous, current, next)
+            // magnitudes[i] is a peak iff it's greater than it's surrounding points
+            if maximum == current && current != next {
+                maxima.append(current)
+            }
+        }
+        return maxima
     }
 }
 
@@ -372,7 +423,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     }
     
     func stopRecording() {
-        // https://www.appcoda.com/replaykit/
         recorder.stopRecording { [unowned self] (preview, error) in
             print("Stopped recording")
             
@@ -405,24 +455,28 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             
             let scores = scoreJumpingJack(frames: self.recordedFrames)
             
-            printJJ(scores: scores)
+            let topMaximums = scores[0].localMaxima()
+            let middleMaximums = scores[1].localMaxima()
+            let bottomMaximums = scores[2].localMaxima()
+            
+            print(topMaximums)
+            print(middleMaximums)
+            print(bottomMaximums)
             
             // reset timer, record button
             self.isRecording = false
             
             saveFrame(frames: self.recordedFrames)
             
-            
-            
+            let maxScores = scoreJumpingJack(frames: self.recordedFrames)
+        
             self.timer?.invalidate()
             self.milliseconds = 0
             self.hideTimer()
             self.recordButton.setTitle("Start", for: .normal)
             self.recordButton.layer.cornerRadius = self.recordButton.layer.frame.height / 2
             self.recordButtonView.layer.cornerRadius = self.recordButtonView.layer.frame.height / 2
-//            self.recordButtonView.animateCornerRadius(from: 10, to: self.recordButtonView.layer.frame.height / 2, duration: 0.25)
             
-//            self.performSegue(withIdentifier: "toReview", sender: self)
         }
     }
     
@@ -592,20 +646,10 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             let rightFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.rightFoot, origin: frame.skeleton.hip, relativePlane: Plane.XZ))
             let leftFootAngle = makeDegreeStringPretty(deg: getAngleFromXYZ(endPoint: frame.skeleton.leftFoot, origin: frame.skeleton.hip, relativePlane: Plane.XZ))
                 
-            
-            // Score each frame on the 3 'snapshots' of a JJ
-            let jjNeutralScore = scoreJumpingJackMiddle(frame: frame)
-            let jjBottomScore = scoreJumpingJackBottom(frame: frame)
-            let jjTopScore = scoreJumpingJackTop(frame: frame)
-            
             self.rightHandAngleLabel.text = "Right Hand " + String(describing: rightHandAngle)
             self.leftHandleAngleLabel.text = "Left Hand " + String(describing: leftHandAngle)
             self.rightFootAngleLabel.text = "Right Foot " + String(describing: rightFootAngle)
             self.leftFootAngleLabel.text = "Left Foot " + String(describing: leftFootAngle)
-            
-            self.neutralScore.text = String(describing: frame.skeleton.rightHand)
-            self.topScore.text = String(describing: frame.skeleton.rightShoulder)
-            self.bottomScore.text = String(describing: jjBottomScore)
             
             if(self.isRecording){
                 addFrameToList(frame: frame)
