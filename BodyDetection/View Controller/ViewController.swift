@@ -13,7 +13,11 @@ import ReplayKit
 import Photos
 
 
-let maxHandAngle = 60.0 // degrees
+let MAX_HAND_ANGLE = 65.0 // degrees
+let TOP_SCORE_THRESHHOLD = 5000.0
+let MIDDLE_SCORE_THRESHHOLD = 6000.0
+let BOTTOM_SCORE_THRESHHOLD = 2500.0
+
 
 enum Plane {
     case XY
@@ -72,7 +76,7 @@ func saveFrame(frames: [Frame]) {
         encoder.outputFormatting = .prettyPrinted
         let jsonData = try encoder.encode(frames)
         let jsonString = String(data: jsonData, encoding: .utf8)!
-        print(jsonString)
+        //print(jsonString)
     } catch { print(error) }
 }
 
@@ -121,10 +125,18 @@ func scoreJumpingJackMiddle(frame: Frame) -> Float {
     
     
     // The max score for the neutral position is when the arm angles are as close to zero as possible
-    let max_deviation = pow(Float(maxHandAngle), 2) + pow(Float(maxHandAngle), 2)
+    let max_deviation = pow(Float(MAX_HAND_ANGLE), 2) + pow(Float(MAX_HAND_ANGLE), 2)
     let score =  (max_deviation - (pow(rightArmAngle, 2) + pow(leftArmAngle, 2)))
     
     return score
+}
+
+func reverseScoreJumpingJackMiddle(score: Float) -> Float {
+        
+    // The max score for the neutral position is when the arm angles are as close to zero as possible
+    let max_deviation = pow(Float(MAX_HAND_ANGLE), 2) + pow(Float(MAX_HAND_ANGLE), 2)
+    let angle = sqrt((score - max_deviation)/(-2.0))
+    return angle
 }
 
 func scoreJumpingJackTop(frame: Frame) -> Float {
@@ -144,6 +156,10 @@ func scoreJumpingJackTop(frame: Frame) -> Float {
     return score
 }
 
+func reverseScoreJumpingJackTop(score: Float) -> Float {
+    let angle = sqrt(score/2.0)
+    return angle
+}
 
 func scoreJumpingJackBottom(frame: Frame) -> Float {
         
@@ -160,6 +176,13 @@ func scoreJumpingJackBottom(frame: Frame) -> Float {
     }
     
     return score
+}
+
+func reverseScoreJumpingJackBottom(score: Float) -> Float {
+    
+    let angle = sqrt(score/2.0)
+    
+    return angle
 }
 
 
@@ -204,7 +227,7 @@ extension Collection where Element: Comparable {
         var currentIndex = slice.startIndex
         var nextIndex = slice.index(after: currentIndex)
 
-        while currentIndex < slice.endIndex {
+        while nextIndex < slice.endIndex {
             defer {
                 previousIndex = currentIndex
                 currentIndex = nextIndex
@@ -215,8 +238,10 @@ extension Collection where Element: Comparable {
             let next = slice[nextIndex]
 
             // For the first element, there is no previous
-            if previousIndex == nil, Swift.max(current, next) == current {
-                maxima.append(current)
+            if previousIndex == nil {
+                if Swift.max(current, next) == current {
+                    maxima.append(current)
+                }
                 continue
             }
 
@@ -444,7 +469,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
                 self.present(preview!, animated: true, completion: nil)
             })
             
-            // how to bypass preview view controller?!
             let saveAction = UIAlertAction(title: "Save", style: .default) { (action) in
                 print("saved")
             }
@@ -455,9 +479,46 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             
             let scores = scoreJumpingJack(frames: self.recordedFrames)
             
+            for i in 0..<scores[0].count{
+                print( "\(scores[0][i]) \(scores[1][i]) \(scores[2][i])")
+            }
+            
             let topMaximums = scores[0].localMaxima()
+            var sum = Float(0.0)
+            var count = 0;
+            for s in topMaximums{
+                if(s >= Float(TOP_SCORE_THRESHHOLD)){
+                    sum = sum + s
+                    count+=1
+                }
+                
+            }
+            sum = sum/Float(count);
+            self.topScore.text = String(describing: sum)
+            
             let middleMaximums = scores[1].localMaxima()
+            sum = 0.0
+            count = 0;
+            for s in middleMaximums{
+                if(s >= Float(MIDDLE_SCORE_THRESHHOLD)) {
+                     sum = sum + s
+                    count+=1
+                 }
+            }
+            sum = sum/Float(count)
+            self.neutralScore.text = String(describing: sum)
+            
             let bottomMaximums = scores[2].localMaxima()
+            sum = 0.0
+            count = 0
+            for s in bottomMaximums{
+                if(s >= Float(BOTTOM_SCORE_THRESHHOLD) ){
+                     sum = sum + s
+                     count+=1
+                 }
+            }
+            sum = sum/Float(count)
+            self.bottomScore.text = String(describing: sum)
             
             print(topMaximums)
             print(middleMaximums)
