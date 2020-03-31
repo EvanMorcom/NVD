@@ -1,22 +1,29 @@
 {
     "People": [
         {
-            "Name": "Nikhil Yerasi",
-            "Affiliation": "Undergraduate, Data Science",
-            "Position": "iOS Developer",
+            "Name": "Evan Morcom",
+            "Affiliation": "Mechatronics Engineering Student",
+        },
+        {
+            "Name": "Alex Driedger",
+            "Affiliation": "Computer Engineering Student",
             
         },
         {
-            "Name": "Caroline Liu",
-            "Affiliation": "Undergraduate, EECS",
-            "Position": "Mobile Developer",
-            
+            "Name": "Ryan Lee",
+            "Affiliation": "Mechatronics Engineering Student",
         },
         {
-            "Name": "Mathias Vissers",
-            "Affiliation": "Masters, Translational Medicine",
-            "Position": "Project Lead",
-            
-        }
+            "Name": "Jeffery Hou",
+            "Affiliation": "Mechanical Engineering Student",
+        },
+        {
+            "Name": "Sebastian Mendo",
+            "Affiliation": "Funnel Hacker",
+        },
+        {
+            "Name": "Shirley Guo",
+            "Affiliation": "Financial Legend",
+        },
     ]
 }

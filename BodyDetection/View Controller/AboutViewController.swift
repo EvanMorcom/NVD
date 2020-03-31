@@ -1,11 +1,3 @@
-//
-//  AboutViewController.swift
-//  BodyDetection
-//
-//  Created by Nikhil Yerasi on 12/3/19.
-//  Copyright © 2019 Apple. All rights reserved.
-//
-
 import UIKit
 
 protocol ModalViewControllerDelegate: class {
@@ -29,8 +21,6 @@ class AboutViewController: UIViewController, UITableViewDelegate, UITableViewDat
         dismiss(animated: true, completion: nil)
         delegate?.removeBlurredBackgroundView()
     }
-    
-    // MARK: - Table view data source
 
     func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections

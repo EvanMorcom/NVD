@@ -1,10 +1,3 @@
-/*
- See LICENSE folder for this sample’s licensing information.
- 
- Abstract:
- The sample app's main view controller.
- */
-
 import UIKit
 import RealityKit
 import ARKit
@@ -16,7 +9,7 @@ import Photos
 let MAX_HAND_ANGLE = 65.0 // degrees
 let TOP_SCORE_THRESHHOLD = 5000.0
 let MIDDLE_SCORE_THRESHHOLD = 6000.0
-let BOTTOM_SCORE_THRESHHOLD = 2500.0
+let BOTTOM_SCORE_THRESHHOLD = 3000.0
 
 
 enum Plane {
@@ -80,6 +73,12 @@ func saveFrame(frames: [Frame]) {
     } catch { print(error) }
 }
 
+func makeDegreeStringPretty(deg: Float) -> String {
+    let s = Int(floor(deg))
+    return "\(s) degrees"
+}
+
+
 //  Gets the angle betwen two points, relatie to a plane. For reference with respect to a phone being held up vertically recording someone, positive X is to the right, positive Y is up, and positive Z is coming at you.
 //
 // All angles are between -90 and 90 degrees, with the value of the 3rd dimension determining the sign of the angle.
@@ -135,7 +134,7 @@ func reverseScoreJumpingJackMiddle(score: Float) -> Float {
         
     // The max score for the neutral position is when the arm angles are as close to zero as possible
     let max_deviation = pow(Float(MAX_HAND_ANGLE), 2) + pow(Float(MAX_HAND_ANGLE), 2)
-    let angle = sqrt((score - max_deviation)/(-2.0))
+    let angle = sqrt( abs((score - max_deviation)/(-2.0)))
     return angle
 }
 
@@ -157,7 +156,7 @@ func scoreJumpingJackTop(frame: Frame) -> Float {
 }
 
 func reverseScoreJumpingJackTop(score: Float) -> Float {
-    let angle = sqrt(score/2.0)
+    let angle = sqrt(abs(score/2.0))
     return angle
 }
 
@@ -180,7 +179,7 @@ func scoreJumpingJackBottom(frame: Frame) -> Float {
 
 func reverseScoreJumpingJackBottom(score: Float) -> Float {
     
-    let angle = sqrt(score/2.0)
+    let angle = sqrt(abs(score/2.0))
     
     return angle
 }
@@ -207,12 +206,6 @@ func scoreJumpingJack(frames: [Frame]) -> [[Float]] {
     
     return [topScores, middleScores, bottomScores]
 }
-//
-//func printJJ(scores: [JumpingJackScores]){
-//    for score in scores {
-//        print("\(score.top) \(score.mid) \(score.bottom)")
-//    }
-//}
 
 extension Collection where Element: Comparable {
     func localMaxima() -> [Element] {
@@ -266,6 +259,10 @@ extension Collection where Element: Comparable {
     }
 }
 
+var topFeedbackAngle = Float(0.0)
+var bottomFeedbackAngle = Float(0.0)
+var middleFeedbackAngle = Float(0.0)
+
 class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControllerDelegate {
     
     @IBOutlet var recordButton: UIButton!
@@ -313,111 +310,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         }
     }
     
-    // attempting to record without presenting preview view controller: https://stackoverflow.com/questions/33484101/how-to-save-replaykit-video-to-camera-roll-with-in-app-button?rq=1
-    /*
-       @objc func startScreenRecording() {
-           //Use ReplayKit to record the screen
-
-           //Create the file path to write to
-           let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-           self.videoOutputURL = URL(fileURLWithPath: documentsPath.appendingPathComponent("MyVideo.mp4"))
-
-           //Check the file does not already exist by deleting it if it does
-           do {
-               try FileManager.default.removeItem(at: videoOutputURL)
-           } catch {}
-
-
-           do {
-               try videoWriter = AVAssetWriter(outputURL: videoOutputURL, fileType: AVFileType.mp4)
-           } catch let writerError as NSError {
-               print("Error opening video file", writerError)
-               videoWriter = nil
-               return
-           }
-
-           //Create the video settings
-           let videoSettings: [String : Any] = [
-               AVVideoCodecKey  : AVVideoCodecType.h264,
-               AVVideoWidthKey  : 1920,  //Replace as you need
-               AVVideoHeightKey : 1080   //Replace as you need
-           ]
-
-           //Create the asset writer input object whihc is actually used to write out the video
-           //with the video settings we have created
-           videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings)
-           
-           // NBY: safe to do guard let for videoWriter and videoWriterInput?
-           guard let videoWriter = videoWriter else { return }
-           guard let videoWriterInput = videoWriterInput else { return }
-           
-           videoWriter.add(videoWriterInput)
-
-           //Tell the screen recorder to start capturing and to call the handler when it has a
-           //sample
-           RPScreenRecorder.shared().startCapture(handler: { (cmSampleBuffer, rpSampleType, error) in
-
-               guard error == nil else {
-                   //Handle error
-                   print("Error starting capture")
-                   return
-               }
-
-               switch rpSampleType {
-                   case RPSampleBufferType.video:
-                       print("writing sample....")
-                       if self.videoWriter.status == AVAssetWriter.Status.unknown {
-
-                           if (( self.videoWriter?.startWriting ) != nil) {
-                               print("Starting writing")
-                               self.videoWriter.startWriting()
-                               self.videoWriter.startSession(atSourceTime:  CMSampleBufferGetPresentationTimeStamp(cmSampleBuffer))
-                           }
-                       }
-
-                       if self.videoWriter.status == AVAssetWriter.Status.writing {
-                           if (self.videoWriterInput.isReadyForMoreMediaData == true) {
-                               print("Writing a sample")
-                               if  self.videoWriterInput.append(cmSampleBuffer) == false {
-                                   print(" we have a problem writing video")
-                               }
-                           }
-                   }
-
-                   default:
-                       print("not a video sample, so ignore")
-               }
-           } )
-       }
-
-       @objc func stopScreenRecording() {
-           //Stop Recording the screen
-           RPScreenRecorder.shared().stopCapture( handler: { (error) in
-               print("stopping recording")
-           })
-           
-           self.videoWriterInput.markAsFinished()
-           self.videoWriter.finishWriting {
-               print("finished writing video")
-
-               //Now save the video
-               PHPhotoLibrary.shared().performChanges({
-                   PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: self.videoOutputURL)
-               }) { saved, error in
-                   if saved {
-                       let alertController = UIAlertController(title: "Your video was successfully saved", message: nil, preferredStyle: .alert)
-                       let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                       alertController.addAction(defaultAction)
-                       self.present(alertController, animated: true, completion: nil)
-                   }
-                   if error != nil {
-                       print("Video did not save for some reason", error.debugDescription)
-                       debugPrint(error?.localizedDescription ?? "error is nil")
-                   }
-               }
-           }
-       */
-    
     func startRecording() {
         // https://www.appcoda.com/replaykit/
         guard recorder.isAvailable else {
@@ -440,7 +332,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             self.recordButton.setTitle("Stop", for: .normal)
             self.recordButton.layer.cornerRadius = 10
             self.recordButtonView.layer.cornerRadius = 10
-//            self.recordButtonView.animateCornerRadius(from: self.recordButtonView.layer.frame.height / 2, to: 10, duration: 0.25)
             self.timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true, block: { (timer) in
             })
         }
@@ -456,7 +347,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
                 return
             }
             
-            let alert = UIAlertController(title: "Recording Finished", message: "Would you like to edit or delete your recording?", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Analysis Finished", message: "Would you like to review or delete your Analysis?", preferredStyle: .alert)
             
             let deleteAction = UIAlertAction(title: "Delete", style: .destructive, handler: { (action: UIAlertAction) in
                 self.recorder.discardRecording(handler: { () -> Void in
@@ -464,10 +355,12 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
                 })
             })
             
-            let editAction = UIAlertAction(title: "Edit", style: .default, handler: { (action: UIAlertAction) -> Void in
+            let editAction = UIAlertAction(title: "Review", style: .default, handler: { (action: UIAlertAction) -> Void in
                 preview?.previewControllerDelegate = self
                 self.present(preview!, animated: true, completion: nil)
-            })
+                alert.addTextField { (textField : UITextField!) -> Void in
+                textField.placeholder = "feedback Here"
+                }})
             
             let saveAction = UIAlertAction(title: "Save", style: .default) { (action) in
                 print("saved")
@@ -475,8 +368,12 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             
             alert.addAction(editAction)
             alert.addAction(deleteAction)
+
             self.present(alert, animated: true, completion: nil)
-            
+            let feedback_popup = UIAlertController(title: "Feedback", message: "Do better", preferredStyle: .alert)
+                 
+            self.present(feedback_popup, animated: true, completion: nil)
+                 
             let scores = scoreJumpingJack(frames: self.recordedFrames)
             
             for i in 0..<scores[0].count{
@@ -491,10 +388,10 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
                     sum = sum + s
                     count+=1
                 }
-                
             }
             sum = sum/Float(count);
             self.topScore.text = String(describing: sum)
+            topFeedbackAngle = abs( Float(MAX_HAND_ANGLE) - reverseScoreJumpingJackTop(score: sum))
             
             let middleMaximums = scores[1].localMaxima()
             sum = 0.0
@@ -507,6 +404,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             }
             sum = sum/Float(count)
             self.neutralScore.text = String(describing: sum)
+            middleFeedbackAngle = reverseScoreJumpingJackMiddle(score: sum)
             
             let bottomMaximums = scores[2].localMaxima()
             sum = 0.0
@@ -519,10 +417,7 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             }
             sum = sum/Float(count)
             self.bottomScore.text = String(describing: sum)
-            
-            print(topMaximums)
-            print(middleMaximums)
-            print(bottomMaximums)
+            bottomFeedbackAngle = abs( Float(MAX_HAND_ANGLE) - reverseScoreJumpingJackBottom(score: sum))
             
             // reset timer, record button
             self.isRecording = false
@@ -542,7 +437,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     }
     
     func saveText() {
-        // writes the string printoutText to a file locally and presents an alert upon completion/error
         let filename = getDocumentsDirectory().appendingPathComponent("output.txt")
 
         do {
@@ -593,13 +487,11 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         }
     }
     
-    // placeholder for ReplayKit functionality
     func saveRecording() {
         let alertViewController = UIAlertController(title: "Recording Saved", message: "New \(milliseconds / 100)-second recording has been saved to camera roll", preferredStyle: .alert)
         let action = UIAlertAction(title: "Okay!", style: .default, handler: nil)
         alertViewController.addAction(action)
         self.present(alertViewController, animated: true, completion: {
-//            self.performSegue(withIdentifier: "toReview", sender: self)
         })
     }
     
@@ -608,9 +500,8 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         printoutText = ""
     }
     
-    // The 3D character to display.
     var character: BodyTrackedEntity?
-    let characterOffset: SIMD3<Float> = [-0.3, 0, 0] // Offset the character by one meter to the left
+    let characterOffset: SIMD3<Float> = [-0.3, 0, 0]
     let characterAnchor = AnchorEntity()
     
     override func viewDidLoad() {
@@ -664,8 +555,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     }
     
     func writeAnchor(anchor: ARAnchor) {
-        // adding to a string
-        // goal is to save the knee transform
         printoutText += "\n anchor name: \(String(describing: anchor.name))"
         printoutText += "\n anchor description: \(anchor.description)"
         printoutText += "\n anchor transform: \(anchor.transform)"
@@ -685,18 +574,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
             // Also copy over the rotation of the body anchor, because the skeleton's pose
             // in the world is relative to the body anchor's rotation.
             characterAnchor.orientation = Transform(matrix: bodyAnchor.transform).rotation
-            
-//            // Do some math
-//            let rightHandAngle = makeDegreeStringPretty(deg: getRightHandAngle(bodyAnchor: bodyAnchor))
-//
-//            // Do some math
-//            let leftHandAngle = makeDegreeStringPretty(deg: getLeftHandAngle(bodyAnchor: bodyAnchor))
-//
-//            let rightFootAngle = makeDegreeStringPretty(deg: getRightLegAngle(bodyAnchor: bodyAnchor))
-//
-            // Do some math
-              // Do some math
-            // Update label
 
             let frame = Frame(arSkeleton: bodyAnchor.skeleton, timestamp: milliseconds)
 
@@ -737,10 +614,6 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
         }
     }
     
-    func makeDegreeStringPretty(deg: Float) -> String {
-        let s = Float(floor(10 * deg) / 10)
-        return "\(s) degrees"
-    }
 
     
     func clearFramesList(){
@@ -750,8 +623,4 @@ class ViewController: UIViewController, ARSessionDelegate, RPPreviewViewControll
     func addFrameToList(frame: Frame){
         recordedFrames.append(frame)
     }
-//    func scoreJJMidPosition(frame: Frame){
-//        let right_hand_angle = getRightLegAngle(bodyAnchor: frame.skeleton.)
-////        let left_hand_angle = getLeftHandAngle(bodyAnchor: frame.skeleton)
-//    }
 }

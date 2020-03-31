@@ -1,17 +1,9 @@
-# Capturing Body Motion in 3D
+# Trackk Athletics Analysis
 
-Track a person in the physical environment and visualize their motion by applying the same body movements to a virtual character.  
 
-## Overview
+## Summery
 
-- Note: This sample code project is associated with WWDC 2019 session [607: Bringing People into AR](https://developer.apple.com/videos/play/wwdc19/607/).
+- Trackk is a mock company based on real needs expressed by over 30 interviews competitive atheletes. 
+- Trackk aims to provide atheletes with helpful feedback on their form and technique while they are practicing without a coach.
 
-- Note: To run the app, use an iOS device with A12 chip or later.
-
-## Next Steps
-
-- Replace robot character with simple skeleton to visualize motion
-
-- Implement record functionality to track, save, and playback a specific motion
-
-- Add UI to display analytics for recorded motion
+- Due to the limited time-line of the project and the COVID-19 pandemic, this app only provides feedback on jumping jacks

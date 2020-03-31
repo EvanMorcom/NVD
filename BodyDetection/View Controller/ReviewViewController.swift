@@ -1,15 +1,5 @@
-
-//
-//  ReviewViewController.swift
-//  BodyDetection
-//
-//  Created by Nikhil Yerasi on 2/28/20.
-//  Copyright © 2020 Apple. All rights reserved.
-//
-
 import Foundation
 import UIKit
-
 
 func approximatelyEqual(val1: Float, val2: Float, tolerence: Float) -> Bool {
         
@@ -123,6 +113,36 @@ class ReviewViewController: UIViewController {
         view.backgroundColor = UIColor.clear
         
         textV.text = test_getAngleFromXYZ_xUnitVector() + test_getAngleFromXYZ_yUnitVector() + test_getAngleFromXYZ_xy_equal() + test_getAngleFromXYZ_xy_equal_plus_z() + test_getAngleFromXYZ_xUnitVector_shifted_origin()
+        
+        let check = "✔️"
+        let cross = "❌"
+        var topFeedback = ""
+        var middleFeedback = ""
+        var bottomFeedback = ""
+        
+        if(topFeedbackAngle < Float(5.0)){
+            topFeedback = "Top Position:\n\(check)\n\n"
+        }
+        else {
+            topFeedback = "Top Position:\n\(cross) Your arms need to be \(makeDegreeStringPretty(deg:topFeedbackAngle)) higher!\n\n"
+        }
+        if(middleFeedbackAngle < Float(5.0)){
+            middleFeedback = "Middle Position:\n\(check)\n\n"
+        }
+        else {
+            middleFeedback = "Middle Position:\n\(cross) Your left arm is trailing your right by \(makeDegreeStringPretty(deg: middleFeedbackAngle))!\n\n"
+        }
+        if(bottomFeedbackAngle < Float(5.0)){
+            bottomFeedback = "Bottom Position:\n\(check)\n\n"
+        }
+        else {
+            bottomFeedback = "Bottom Position:\n\(cross) Your arms need to be \(makeDegreeStringPretty(deg: bottomFeedbackAngle)) lower!\n\n"
+        }
+
+        
+        
+        
+        textV.text = topFeedback + middleFeedback + bottomFeedback 
     }
     
 }
